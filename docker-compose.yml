@@ -1,0 +1,79 @@
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: mysql-db
+    environment:
+      MYSQL_ROOT_PASSWORD: root1234
+      MYSQL_DATABASE: innovatech
+      MYSQL_USER: appuser
+      MYSQL_PASSWORD: app1234
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql-data:/var/lib/mysql
+    networks:
+      - innovatech-net
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  back-ventas:
+    image: lucianobc/back-ventas:latest
+    container_name: back-ventas
+    ports:
+      - "8080:8080"
+    environment:
+      DB_ENDPOINT: mysql
+      DB_PORT: 3306
+      DB_NAME: innovatech
+      DB_USERNAME: appuser
+      DB_PASSWORD: app1234
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/innovatech?useSSL=false&serverTimezone=UTC&createDatabaseIfNotExist=true&allowPublicKeyRetrieval=true
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks:
+      - innovatech-net
+
+  back-despachos:
+    image: lucianobc/back-despachos:latest
+    container_name: back-despachos
+    ports:
+      - "8081:8081"
+    environment:
+      DB_ENDPOINT: mysql
+      DB_PORT: 3306
+      DB_NAME: innovatech
+      DB_USERNAME: appuser
+      DB_PASSWORD: app1234
+      SPRING_DATASOURCE_URL: jdbc:mysql://mysql:3306/innovatech?useSSL=false&serverTimezone=UTC&createDatabaseIfNotExist=true&allowPublicKeyRetrieval=true
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks:
+      - innovatech-net
+
+  front:
+    build:
+      context: ./front_despacho
+      args:
+        VITE_API_VENTAS: http://34.238.23.161:8080      
+        VITE_API_DESPACHOS: http://34.238.23.161:8081  
+    image: lucianobc/front-despacho:latest              
+    container_name: front-despacho
+    ports:
+      - "80:80"
+    depends_on:
+      - back-ventas
+      - back-despachos
+    networks:
+      - innovatech-net
+
+volumes:
+  mysql-data:
+
+networks:
+  innovatech-net:
+    driver: bridge
