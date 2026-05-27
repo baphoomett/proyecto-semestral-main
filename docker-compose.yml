@@ -23,7 +23,7 @@ services:
     build:
       context: ./back-Ventas_SpringBoot/Springboot-API-REST
       dockerfile: Dockerfile
-    image: lucianobc/back-ventas:latest
+    image: maxxito/back-ventas:latest
     container_name: back-ventas
     ports:
       - "8082:8080"
@@ -44,7 +44,7 @@ services:
     build:
       context: ./back-Despachos_SpringBoot/Springboot-API-REST-DESPACHO
       dockerfile: Dockerfile
-    image: lucianobc/back-despachos:latest
+    image: maxxito/back-despachos:latest
     container_name: back-despachos
     ports:
       - "8083:8081"
@@ -67,7 +67,7 @@ services:
       args:
         VITE_API_VENTAS: http://back-ventas:8080
         VITE_API_DESPACHOS: http://back-despachos:8081
-    image: lucianobc/front-despacho:latest              
+    image: maxxito/front-despacho:latest              
     container_name: front-despacho
     ports:
       - "8084:80"
